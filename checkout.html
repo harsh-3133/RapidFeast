@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout & Payment - RapidFeast</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-warning" href="index.html">
+        <i class="fas fa-hamburger me-2"></i>RapidFeast Checkout
+      </a>
+      <a href="Menu.html" class="btn btn-outline-light btn-sm">&larr; Back to Menu</a>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <div class="row g-4">
+      <!-- Left Column: Order Summary & Address Form -->
+      <div class="col-lg-7">
+        <div class="card shadow-sm border-0 p-4 mb-4">
+          <h4 class="fw-bold text-primary mb-3"><i class="fas fa-receipt me-2"></i>Order Summary</h4>
+          <div id="cartItemsList" class="mb-3"></div>
+          <hr>
+          <div class="d-flex justify-content-between fw-bold fs-5">
+            <span>Total Payable:</span>
+            <span id="grandTotal" class="text-success">₹0</span>
+          </div>
+        </div>
+
+        <div class="card shadow-sm border-0 p-4">
+          <h4 class="fw-bold text-primary mb-3"><i class="fas fa-truck me-2"></i>Delivery Details</h4>
+          <form id="shippingForm">
+            <div class="row g-2 mb-2">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Full Name</label>
+                <input type="text" id="cName" class="form-control" placeholder="Enter name" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Phone Number</label>
+                <input type="tel" id="cPhone" class="form-control" placeholder="Enter phone" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Delivery Address</label>
+              <textarea id="cAddr" class="form-control" rows="2" placeholder="Complete Street Delivery Address" required></textarea>
+            </div>
+            <button type="submit" id="submitOrderBtn" class="btn btn-primary w-100 fw-bold py-2">
+              <i class="fas fa-lock me-1"></i> Proceed to Pay & Generate QR
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Column: Payment Box (Default: Hidden / Locked) -->
+      <div class="col-lg-5">
+        <!-- Placeholder when not generated -->
+        <div id="qrLockedState" class="card shadow-sm border-0 p-4 text-center h-100 d-flex flex-column justify-content-center align-items-center">
+          <i class="fas fa-shield-alt text-muted fa-3x mb-3"></i>
+          <h5 class="fw-bold text-muted">Payment QR Locked</h5>
+          <p class="text-muted small mb-0">Fill in your delivery details on the left and click <strong>Proceed to Pay</strong> to generate your dynamic payment QR code.</p>
+        </div>
+
+        <!-- Active QR Section (Revealed on Button Click) -->
+        <div id="qrActiveSection" class="card shadow-sm border-0 p-4 text-center" style="display: none;">
+          <h5 class="fw-bold text-dark mb-1"><i class="fas fa-qrcode text-warning me-2"></i>Scan & Pay (UPI)</h5>
+          <p class="text-muted small">Session valid for: <strong id="timerDisplay" class="text-danger">05:00</strong></p>
+
+          <div class="my-3 p-3 bg-white border rounded d-inline-block shadow-sm">
+            <img id="qrCodeImg" src="" alt="UPI QR" style="width: 180px; height: 180px;">
+          </div>
+
+          <div class="alert alert-info py-2 small mb-3">
+            GPay / PhonePe / Paytm Supported
+          </div>
+
+          <button id="verifyPayBtn" class="btn btn-success w-100 fw-bold py-2 mb-2">
+            <i class="fas fa-check-circle me-1"></i> Simulate Payment Done ✅
+          </button>
+          <small class="text-success fw-bold d-block">Scan QR or click confirm after completing payment</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let timerInterval = null;
+
+    function renderCheckout() {
+      const items = Cart.get();
+      const container = document.getElementById('cartItemsList');
+      const submitBtn = document.getElementById('submitOrderBtn');
+
+      if (items.length === 0) {
+        container.innerHTML = '<div class="alert alert-warning">Your cart is empty! <a href="Menu.html">Add items from Menu</a></div>';
+        document.getElementById('grandTotal').innerText = '₹0';
+        submitBtn.disabled = true;
+        resetQrState();
+        return;
+      }
+      
+      submitBtn.disabled = false;
+      container.innerHTML = items.map(item => `
+        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+          <div>
+            <strong class="d-block">${item.name}</strong>
+            <span class="text-muted small">₹${item.price} x ${item.qty}</span>
+          </div>
+          <div>
+            <span class="fw-bold me-3">₹${item.price * item.qty}</span>
+            <button class="btn btn-outline-danger btn-sm py-0 px-2" onclick="Cart.remove(${item.id}); renderCheckout();">&times;</button>
+          </div>
+        </div>
+      `).join('');
+
+      const total = Cart.total();
+      document.getElementById('grandTotal').innerText = `₹${total}`;
+    }
+
+    function resetQrState() {
+      clearInterval(timerInterval);
+      document.getElementById('qrLockedState').style.display = 'flex';
+      document.getElementById('qrActiveSection').style.display = 'none';
+    }
+
+    function startTimer() {
+      let duration = 300; // 5 minutes
+      const timerDisplay = document.getElementById('timerDisplay');
+      
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const mins = String(Math.floor(duration / 60)).padStart(2, '0');
+        const secs = String(duration % 60).padStart(2, '0');
+        timerDisplay.innerText = `${mins}:${secs}`;
+        
+        if (--duration < 0) {
+          clearInterval(timerInterval);
+          timerDisplay.innerText = "EXPIRED";
+          document.getElementById('qrCodeImg').style.filter = "blur(5px)";
+          document.getElementById('verifyPayBtn').disabled = true;
+          alert("Payment session expired! Please submit form again to generate new QR.");
+        }
+      }, 1000);
+    }
+
+    // Trigger QR generation ONLY on form submit
+    document.getElementById('shippingForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const total = Cart.total();
+      if (total <= 0) {
+        alert('Please add items to your cart first!');
+        return;
+      }
+
+      // Generate Dynamic QR with live amount
+      document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=rapidfeast@upi&pn=RapidFeast&am=${total}`;
+      document.getElementById('qrCodeImg').style.filter = "none";
+      document.getElementById('verifyPayBtn').disabled = false;
+
+      // Reveal QR Box & Hide Locked State
+      document.getElementById('qrLockedState').style.display = 'none';
+      document.getElementById('qrActiveSection').style.display = 'block';
+
+      // Start 5-min timer
+      startTimer();
+
+      // Smooth scroll to QR section on mobile/smaller screens
+      document.getElementById('qrActiveSection').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Payment Done -> Redirect to Live Tracking
+    document.getElementById('verifyPayBtn').addEventListener('click', () => {
+      clearInterval(timerInterval);
+      const orderId = 'RF-' + Math.floor(100000 + Math.random() * 900000);
+      const orderData = {
+        orderId,
+        items: Cart.get(),
+        total: Cart.total(),
+        customer: document.getElementById('cName').value,
+        address: document.getElementById('cAddr').value,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      localStorage.setItem('rapid_active_order', JSON.stringify(orderData));
+      Cart.clear();
+      window.location.href = 'track.html';
+    });
+
+    renderCheckout();
+  </script>
+</body>
+</html>

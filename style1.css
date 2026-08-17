@@ -1,0 +1,158 @@
+*{
+box-sizing: border-box;
+padding: 0px;
+margin: 0px;
+}
+
+.testimonial-card:hover .extra-info {
+    opacity: 1;
+  }
+
+  /* Additional styling for testimonial section */
+  .testimonial-card {
+    transition: transform 0.3s ease;
+  }
+  
+  /* Scale up testimonial card on hover */
+  .testimonial-card:hover {
+    transform: scale(1.05);
+  }
+
+  .social-icon:hover {
+    color: #ffdd00;
+    transform: scale(1.2);
+  }
+
+  /* Hover Effects for Navigation Links */
+  .footer-link:hover {
+    color: #ffdd00;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* Hover Effects for Back to Top Button */
+  .back-to-top:hover {
+    background-color: #00b3e3;
+    color: white;
+    transform: scale(1.1);
+  }
+
+  /* Logo Image hover effect */
+  .logo-img:hover {
+    transform: scale(1.1);
+  }
+
+
+  .form-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  #map {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+  }
+  .map-container {
+    height: 400px;
+  }
+
+  .flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .form-check {
+    flex-basis: 48%;  /* Adjust flex items to have some width */
+  }
+
+  .map {
+    display: flex;
+    justify-content: center;
+    /* padding-top: 50px; */
+    /* color: red; */
+    font-size: 50px;
+}
+
+
+ul.navbar-nav.ms-auto {
+  margin-right: 330px;
+  gap: 30px;
+  
+}
+
+a.btn.btn-primary.btn-lg {
+
+  margin-top: -35px;
+}
+
+
+img.d-block.w-100 {
+  /* width: 40px; */
+  height: 600px;
+}
+
+.gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the available space while maintaining aspect ratio */
+  border-radius: 8px; /* Optional: for rounded corners */
+}
+
+img.img-fluid.mb-3 {
+  height: 100px;
+  width: 100px;
+}
+
+.search-container {
+  margin-bottom: 20px;
+}
+.items {
+  display: flex;
+  flex-wrap: wrap;
+}
+.item-card {
+  border: 1px solid #ccc;
+  margin: 10px;
+  padding: 10px;
+  width: 200px;
+  text-align: center;
+}
+.hidden {
+  display: none;
+}
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.3s ease;
+}
+a.btn.btn-primary.btn-lg {
+  margin-top: 5px;
+  
+}
+.line{
+  font-size: 11px;
+  font-family: 'Montserrat', sans-serif;
+  text-align: center;
+  background-color: rgb(174, 174, 174);
+  color: black;
+  font-weight: bold;
+}
+.d-blockw-100{
+object-fit: cover;
+  width: 100%;
+  height: 600px;
+}
+
+.homevid{
+  opacity: 1; /* Make the video visible when hovered */
+}
