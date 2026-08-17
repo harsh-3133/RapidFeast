@@ -34,7 +34,7 @@ export default function Checkout({ cart, setCart }) {
     setLoading(true);
     try {
       // POST request to FastAPI Backend
-      const res = await axios.post('https://rapidfeast-backend.onrender.com/api/orders', {
+      const res = await axios.post('https://YOUR-RENDER-URL.onrender.com/api/orders', {
         customerName: form.name,
         phone: form.phone,
         address: form.address,
