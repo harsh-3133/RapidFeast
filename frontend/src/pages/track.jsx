@@ -9,7 +9,7 @@ export default function Track() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/api/orders/${orderId}`)
+    axios.get(`https://YOUR-RENDER-URL.onrender.com/api/orders/${orderId}`)
       .then(res => {
         setOrder(res.data.order);
         setLoading(false);
